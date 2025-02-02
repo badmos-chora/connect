@@ -4,6 +4,7 @@ package org.backend.user.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -21,7 +22,8 @@ import java.util.Set;
 @NoArgsConstructor
 public class User {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "users_seq")
+    @SequenceGenerator(name = "users_seq", sequenceName = "users_seq", allocationSize = 1)
     private Long id;
 
     @NotBlank
@@ -44,18 +46,26 @@ public class User {
     @Column(nullable = false)
     private String password;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "users_roles",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "roles_id"))
     @Fetch(FetchMode.JOIN)
     private Set<Role> roles = new LinkedHashSet<>();
 
-    @Column(name = "is_enabled")
+    @NotNull
+    @Column(name = "is_enabled", nullable = false)
     private Boolean isEnabled;
 
-    @Column(name = "is_locked")
+    @NotNull
+    @Column(name = "is_locked", nullable = false)
     private Boolean isLocked;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "users_permissions",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "permission_id"))
+    private Set<Permission> permissions = new LinkedHashSet<>();
 
     @Override
     public boolean equals(Object o) {

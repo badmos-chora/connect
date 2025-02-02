@@ -10,20 +10,18 @@ import java.util.Set;
 
 @Getter
 @Setter
-@Entity
-@Table(name = "roles")
-
+@Entity(name = "roles")
 public class Role {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "roles_seq")
+    @SequenceGenerator(name = "roles_seq", sequenceName = "roles_seq", allocationSize = 1)
     @Column(name = "id", nullable = false)
     private Long id;
 
     @Column(name = "role_name", nullable = false, unique = true)
     private String roleName;
 
-
-    @ManyToMany(mappedBy = "roles")
+    @ManyToMany(mappedBy = "roles", fetch = FetchType.LAZY)
     private Set<User> users = new LinkedHashSet<>();
 
     @Override
