@@ -5,9 +5,11 @@ import org.backend.user.dto.UserDto;
 import org.backend.user.service.interfaces.AccountServices;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@RestController("/account")
+@RestController
+@RequestMapping("/account")
 @AllArgsConstructor
 public class AccountController {
 

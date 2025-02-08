@@ -12,14 +12,19 @@
 
 
 
-    <security:http auto-config="true" >
+    <security:http auto-config="false" entry-point-ref="customEntryPointHandler" >
         <security:csrf disabled="true"/>
         <security:intercept-url pattern="/login" access="permitAll()" />
         <security:intercept-url pattern="/hi" access="permitAll()"/>
+        <security:intercept-url pattern="/account/register" access="permitAll()"/>
         <security:intercept-url pattern="/**" access="isAuthenticated()" />
 
+    <security:form-login login-page="/login" authentication-failure-handler-ref="customAuthenticationFailureHandler" authentication-success-handler-ref="customAuthenticationSuccessHandler"   />
+    <security:logout  />
     </security:http>
-
+    <bean id="customAuthenticationSuccessHandler" class="org.backend.user.security.CustomAuthenticationSuccessHandler"/>
+    <bean id="customAuthenticationFailureHandler" class="org.backend.user.security.CustomAuthenticationFailureHandler"/>
+    <bean id="customEntryPointHandler" class="org.backend.user.security.CustomEntryPointHandler"/>
 
     <bean id="passwordEncoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder" />
     <security:authentication-manager id="authenticationManager" alias="authenticationManager">

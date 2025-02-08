@@ -5,13 +5,10 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
+import lombok.*;
 
+
+import java.io.Serializable;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -20,7 +17,8 @@ import java.util.Set;
 @AllArgsConstructor
 @Entity(name = "users")
 @NoArgsConstructor
-public class User {
+@Builder
+public class User  implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "users_seq")
     @SequenceGenerator(name = "users_seq", sequenceName = "users_seq", allocationSize = 1)
@@ -46,11 +44,10 @@ public class User {
     @Column(nullable = false)
     private String password;
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "users_roles",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "roles_id"))
-    @Fetch(FetchMode.JOIN)
     private Set<Role> roles = new LinkedHashSet<>();
 
     @NotNull
@@ -61,7 +58,7 @@ public class User {
     @Column(name = "is_locked", nullable = false)
     private Boolean isLocked;
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "users_permissions",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "permission_id"))

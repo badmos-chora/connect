@@ -1,0 +1,18 @@
+package org.backend.user.security;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.backend.user.utils.SecurityUtils;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.web.AuthenticationEntryPoint;
+
+import java.io.IOException;
+
+public class CustomEntryPointHandler implements AuthenticationEntryPoint {
+    @Override
+    public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
+        String redirectUrl = SecurityUtils.hostUrl(request) + "/user/login";
+        response.sendRedirect(redirectUrl);
+    }
+}

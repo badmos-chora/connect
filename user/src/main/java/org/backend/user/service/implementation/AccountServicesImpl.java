@@ -18,14 +18,15 @@ public class AccountServicesImpl implements AccountServices {
 
     @Override
     public String register(UserDto userDto) {
-        User newUser = new User();
-        newUser.setUserName(userDto.userName());
-        newUser.setFirstName(userDto.firstName());
-        newUser.setLastName(userDto.lastName());
-        newUser.setEmail(userDto.email());newUser.setPassword(passwordEncoder.encode(userDto.password()));
-        newUser.setIsEnabled(true);
-        newUser.setIsLocked(false);
-        userRepository.save(newUser);
+        User.UserBuilder userBuilder = User.builder();
+        userBuilder.firstName(userDto.firstName())
+                .lastName(userDto.lastName())
+                .userName(userDto.userName())
+                .email(userDto.email())
+                .password(passwordEncoder.encode(userDto.password()))
+                .isEnabled(true)
+                .isLocked(false);
+        userRepository.save(userBuilder.build());
         return "User registered successfully";
     }
 }
