@@ -2,17 +2,14 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:security="http://www.springframework.org/schema/security"
-       xmlns:context="http://www.springframework.org/schema/context"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
        http://www.springframework.org/schema/beans/spring-beans.xsd
        http://www.springframework.org/schema/security
-       https://www.springframework.org/schema/security/spring-security.xsd
-       http://www.springframework.org/schema/context
-       https://www.springframework.org/schema/context/spring-context.xsd">
+       https://www.springframework.org/schema/security/spring-security.xsd">
 
 
 
-    <security:http auto-config="false" entry-point-ref="customEntryPointHandler" >
+    <security:http auto-config="false" entry-point-ref="customEntryPointHandler" create-session="ifRequired">
         <security:csrf disabled="true"/>
         <security:intercept-url pattern="/login" access="permitAll()" />
         <security:intercept-url pattern="/hi" access="permitAll()"/>

@@ -1,38 +1,68 @@
 package org.backend.user.security;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.backend.user.entity.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+public class CustomUserDetails implements UserDetails, Serializable {
 
-public class CustomUserDetails implements UserDetails {
+    @Serial
+    private static final long serialVersionUID = 1L;
+
+    private final Long userID;
+    private final String username;
+
+    @JsonIgnore
+    private final String password;
+    private final boolean isEnabled;
+    private final boolean isLocked;
+    private final Collection<? extends GrantedAuthority> authorities;
 
     public CustomUserDetails(User user) {
-        this.user = user;
+        this.userID = user.getId();
+        this.username = user.getUserName();
+        this.password = user.getPassword();
+        this.isEnabled = user.getIsEnabled();
+        this.isLocked = user.getIsLocked();
+        this.authorities = getAuthorities(user);
     }
 
-    private final User user;
+    protected CustomUserDetails() {
+        this.userID = null;
+        this.username = null;
+        this.password = null;
+        this.isEnabled = false;
+        this.isLocked = false;
+        this.authorities = null;
+    }
 
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        List<SimpleGrantedAuthority> authorities =new ArrayList<>();
-        user.getRoles().forEach(role -> authorities.add(new SimpleGrantedAuthority(role.getRoleName())));
+    private Collection<? extends GrantedAuthority> getAuthorities(User user) {
+        List<SimpleGrantedAuthority> authorities = new ArrayList<>();
+        user.getRoles().forEach(role -> authorities.add(new SimpleGrantedAuthority("ROLE_" + role.getRoleName())));
         user.getPermissions().forEach(permission -> authorities.add(new SimpleGrantedAuthority(permission.getPermissionName().name())));
         return authorities;
     }
 
     @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return authorities;
+    }
+
+    @Override
     public String getPassword() {
-        return user.getPassword();
+        return password;
     }
 
     @Override
     public String getUsername() {
-        return user.getUserName();
+        return username;
     }
 
     @Override
@@ -42,7 +72,7 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return !user.getIsLocked();
+        return !isLocked;
     }
 
     @Override
@@ -52,6 +82,10 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return user.getIsEnabled();
+        return isEnabled;
+    }
+
+    public Long getUsersID() {
+        return userID;
     }
 }
