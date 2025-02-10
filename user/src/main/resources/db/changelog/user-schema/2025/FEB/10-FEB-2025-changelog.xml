@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.29.xsd"
+        objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
+    <changeSet id="1739164849965-1" author="Aditya">
+        <createTable tableName="user_follower">
+            <column name="follower_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_user_follower" />
+            </column>
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_user_follower"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="1739164849965-2" author="Aditya">
+        <addUniqueConstraint columnNames="user_id, follower_id" constraintName="uc_02f58c5fbb805a2faba52eb6d"
+                             tableName="user_follower"/>
+    </changeSet>
+    <changeSet id="1739164849965-3" author="Aditya">
+        <addForeignKeyConstraint baseColumnNames="follower_id" baseTableName="user_follower"
+                                 constraintName="fk_usefol_on_follower" referencedColumnNames="id"
+                                 referencedTableName="users"/>
+    </changeSet>
+    <changeSet id="1739164849965-4" author="Aditya">
+        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="user_follower"
+                                 constraintName="fk_usefol_on_user" referencedColumnNames="id"
+                                 referencedTableName="users"/>
+    </changeSet>
+
+</databaseChangeLog>

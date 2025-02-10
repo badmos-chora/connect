@@ -8,7 +8,6 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 
-import java.io.Serializable;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -16,6 +15,9 @@ import java.util.Set;
 @Setter
 @AllArgsConstructor
 @Entity(name = "users")
+@Table(indexes = {
+        @Index(name = "idx_user_user_name_unq", columnList = "user_name", unique = true)
+})
 @NoArgsConstructor
 @Builder
 public class User {
@@ -63,6 +65,21 @@ public class User {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "permission_id"))
     private Set<Permission> permissions = new LinkedHashSet<>();
+
+    @ManyToMany
+    @JoinTable(name = "user_follower",
+            joinColumns = @JoinColumn(name = "user_id", nullable = false),
+            inverseJoinColumns = @JoinColumn(name = "follower_id"),
+            uniqueConstraints = @UniqueConstraint(columnNames = {"user_id","follower_id"}),
+            indexes = {
+                    @Index(name = "idx_user_id",columnList = "user_id", unique = true),
+                    @Index(name = "idx_follower_id",columnList = "follower_id", unique = true)}
+    )
+    private Set<User> followers = new LinkedHashSet<>();
+
+    @ManyToMany(mappedBy = "followers")
+    private Set<User> following = new LinkedHashSet<>();
+
 
     @Override
     public boolean equals(Object o) {

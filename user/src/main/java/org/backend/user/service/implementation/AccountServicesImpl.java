@@ -3,8 +3,10 @@ package org.backend.user.service.implementation;
 import lombok.AllArgsConstructor;
 import org.backend.user.dto.UserDto;
 import org.backend.user.entity.User;
+import org.backend.user.projections.UserInfoProjection;
 import org.backend.user.repository.UserRepository;
 import org.backend.user.service.interfaces.AccountServices;
+import org.backend.user.utils.SecurityUtils;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -28,5 +30,11 @@ public class AccountServicesImpl implements AccountServices {
                 .isLocked(false);
         userRepository.save(userBuilder.build());
         return "User registered successfully";
+    }
+
+    @Override
+    public UserInfoProjection profile() {
+        Long userID = SecurityUtils.getCurrentUserId();
+        return userRepository.findUserInfoProjectionById(userID);
     }
 }

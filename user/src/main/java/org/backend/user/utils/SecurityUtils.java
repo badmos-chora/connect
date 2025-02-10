@@ -1,6 +1,8 @@
 package org.backend.user.utils;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.backend.user.security.CustomUserDetails;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 public class SecurityUtils {
 
@@ -16,5 +18,10 @@ public class SecurityUtils {
         }
         // Construct full redirect URL using the gateway's host
         return scheme + "://" + host ;
+    }
+
+    public static Long getCurrentUserId(){
+        CustomUserDetails currentUser= (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return currentUser.getUsersID();
     }
 }
