@@ -26,11 +26,11 @@ public class Role {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
         if (obj == null || getClass() != obj.getClass()) {
             return false;
+        }
+        if (this == obj) {
+            return true;
         }
         Role role = (Role) obj;
         return id.equals(role.id);

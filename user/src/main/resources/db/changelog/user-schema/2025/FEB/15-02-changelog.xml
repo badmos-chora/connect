@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.29.xsd"
+        objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
+    <changeSet id="1739631504514-2" author="Aditya">
+        <createSequence incrementBy="1" sequenceName="follow_request_seq" startValue="1"/>
+    </changeSet>
+    <changeSet id="1739631504514-3" author="Aditya">
+        <addColumn tableName="users">
+            <column name="created_at" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP"/>
+        </addColumn>
+    </changeSet>
+    <changeSet id="1739631504514-4" author="Aditya">
+        <addNotNullConstraint columnName="created_at" tableName="users"/>
+    </changeSet>
+    <changeSet id="1739631504514-1" author="Aditya">
+        <dropIndex indexName="idx_receiver_id" tableName="follow_request"/>
+
+        <dropIndex indexName="idx_sender_id" tableName="follow_request"/>
+
+        <modifyDataType columnName="status" newDataType="VARCHAR(255)" tableName="follow_request"/>
+
+        <dropUniqueConstraint constraintName="follow_request_sender_receiver" tableName="follow_request"/>
+    </changeSet>
+
+</databaseChangeLog>

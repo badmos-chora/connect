@@ -13,4 +13,8 @@ public interface UserInfoProjection {
     String getLastName();
 
     String getEmail();
+
+    default String getFullName() {
+        return getFirstName() + " " + getLastName();
+    }
 }

@@ -5,7 +5,7 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.29.xsd"
         objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
-    <changeSet id="1739164849965-1" author="Aditya">
+    <changeSet id="1739164849965-1" author="Aditya" failOnError="true" >
         <createTable tableName="user_follower">
             <column name="follower_id" type="BIGINT">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="pk_user_follower" />
@@ -29,5 +29,36 @@
                                  constraintName="fk_usefol_on_user" referencedColumnNames="id"
                                  referencedTableName="users"/>
     </changeSet>
+    <changeSet id="1739164849965-6" author="Aditya">
+        <createTable tableName="follow_request">
+            <column name="id"  type="bigserial" >
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_follow_request" />
+            </column>
+            <column name="receiver_user_id" type="bigint" >
+                <constraints nullable="false"  />
+            </column>
+            <column name="sender_user_id" type="bigint" >
+                <constraints nullable="false"  />
+            </column>
+            <column name="status" type="character varying">
+                <constraints nullable="false"  />
+            </column>
+            <column name="sent_at" type="timestamp">
+                <constraints nullable="false"  />
+            </column>
+        </createTable>
+        <addUniqueConstraint tableName="follow_request" columnNames="receiver_user_id, sender_user_id" constraintName="follow_request_sender_receiver"/>
+        <addForeignKeyConstraint baseColumnNames="receiver_user_id" baseTableName="follow_request" constraintName="fk_follow_request_on_receiver_user" referencedColumnNames="id" referencedTableName="users"/>
+        <addForeignKeyConstraint baseColumnNames="sender_user_id" baseTableName="follow_request" constraintName="fk_follow_request_on_sender_user" referencedColumnNames="id" referencedTableName="users"/>
+        <createIndex tableName="follow_request" indexName="idx_sender_id">
+            <column name="sender_user_id"/>
+        </createIndex>
+        <createIndex tableName="follow_request" indexName="idx_receiver_id">
+            <column name="receiver_user_id"/>
+        </createIndex>
+
+
+    </changeSet>
+
 
 </databaseChangeLog>

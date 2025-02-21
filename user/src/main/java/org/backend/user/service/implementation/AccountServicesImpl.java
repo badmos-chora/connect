@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import org.backend.user.dto.UserDto;
 import org.backend.user.entity.User;
 import org.backend.user.projections.UserInfoProjection;
-import org.backend.user.repository.UserRepository;
+import org.backend.user.repository.interfaces.UserRepository;
 import org.backend.user.service.interfaces.AccountServices;
 import org.backend.user.utils.SecurityUtils;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -35,6 +35,6 @@ public class AccountServicesImpl implements AccountServices {
     @Override
     public UserInfoProjection profile() {
         Long userID = SecurityUtils.getCurrentUserId();
-        return userRepository.findUserInfoProjectionById(userID);
+        return userRepository.findById(userID, UserInfoProjection.class);
     }
 }

@@ -6,9 +6,14 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 
+import java.time.Instant;
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 @Getter
@@ -50,6 +55,7 @@ public class User {
     @JoinTable(name = "users_roles",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "roles_id"))
+    @Fetch(FetchMode.JOIN)
     private Set<Role> roles = new LinkedHashSet<>();
 
     @NotNull
@@ -64,9 +70,10 @@ public class User {
     @JoinTable(name = "users_permissions",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "permission_id"))
+    @Fetch(FetchMode.JOIN)
     private Set<Permission> permissions = new LinkedHashSet<>();
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "user_follower",
             joinColumns = @JoinColumn(name = "user_id", nullable = false),
             inverseJoinColumns = @JoinColumn(name = "follower_id"),
@@ -77,9 +84,17 @@ public class User {
     )
     private Set<User> followers = new LinkedHashSet<>();
 
-    @ManyToMany(mappedBy = "followers")
+    @ManyToMany(mappedBy = "followers", fetch = FetchType.LAZY)
     private Set<User> following = new LinkedHashSet<>();
 
+    @OneToMany(mappedBy = "senderUser", orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<FollowRequest> sentFollowRequests = new ArrayList<>();
+
+    @OneToMany(mappedBy = "receiverUser", orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<FollowRequest> receivedFollowRequests = new ArrayList<>();
+
+    @Column(name = "created_at", nullable = false)
+    private Instant createdAt = Instant.now();
 
     @Override
     public boolean equals(Object o) {
@@ -90,6 +105,6 @@ public class User {
 
     @Override
     public int hashCode() {
-        return id.hashCode();
+        return getClass().hashCode();
     }
 }
