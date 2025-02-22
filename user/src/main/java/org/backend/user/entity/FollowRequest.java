@@ -27,13 +27,13 @@ public class FollowRequest {
     @JdbcTypeCode(SqlTypes.BIGINT)
     private Long id;
 
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "sender_user_id", nullable = false)
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "sender_user_id",nullable = false)
     @NotNull
     private User senderUser;
 
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "receiver_user_id")
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "receiver_user_id",nullable = false)
     @NotNull
     private User receiverUser;
 

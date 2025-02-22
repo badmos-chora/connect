@@ -9,12 +9,25 @@ import java.time.Instant;
  */
 public interface FollowRequestProjection {
     Long getId();
-
     FollowRequestStatus getStatus();
 
     Instant getSentAt();
+    Long getSenderUserId();
+    String getSenderUserUserName();
+    String getSenderUserFirstName();
+    String getSenderUserLastName();
+    default String getSenderFullName() {
+        return getSenderUserFirstName().concat(" ").concat(getSenderUserLastName());
+    }
 
-    UserInfoProjection getSenderUser();
+     Long getReceiverUserId();
+    String getReceiverUserUserName();
+    String getReceiverUserFirstName();
+    String getReceiverUserLastName();
+    default String getReceiverFullName() {
+        return getReceiverUserFirstName().concat(" ").concat(getReceiverUserLastName());
+    }
 
-    UserInfoProjection getReceiverUser();
+
+
 }

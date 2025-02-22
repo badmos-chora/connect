@@ -2,7 +2,6 @@ package org.backend.user.repository.interfaces;
 
 import jakarta.persistence.criteria.JoinType;
 import org.backend.user.entity.FollowRequest;
-import org.backend.user.projections.FollowRequestProjection;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
