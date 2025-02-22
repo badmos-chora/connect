@@ -4,11 +4,14 @@ import lombok.AllArgsConstructor;
 import org.backend.user.dto.FollowRequestDto;
 import org.backend.user.entity.FollowRequest;
 import org.backend.user.entity.User;
+import org.backend.user.enums.FollowRequestStatus;
+import org.backend.user.enums.Status;
 import org.backend.user.projections.FollowRequestProjection;
 import org.backend.user.repository.interfaces.FollowRequestRepository;
 import org.backend.user.repository.interfaces.UserRepository;
 import org.backend.user.service.interfaces.FollowRequestService;
 import org.backend.user.utils.SecurityUtils;
+import org.backend.user.utils.ServiceResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +24,7 @@ import java.util.*;
 public class FollowRequestServiceImpl implements FollowRequestService {
 
     private FollowRequestRepository followRequestRepository;
+    private UserRepository userRepository;
 
     @Override
     public Set<FollowRequestDto> getFollowRequests() {
@@ -54,5 +58,28 @@ public class FollowRequestServiceImpl implements FollowRequestService {
             followRequestDtoList.add(followRequestDtoBuilder.build());
         }
         return followRequestDtoList;
+    }
+
+    @Override
+    public ServiceResponse<?> newFollowRequest(String userName) {
+        ServiceResponse.ServiceResponseBuilder<Object> serviceResponse = ServiceResponse.builder();
+        try {
+            FollowRequest.FollowRequestBuilder followRequestBuilder = FollowRequest.builder();
+            User receiverUser = userRepository.findUserByUserNameIgnoreCase(userName);
+            User senderUser = userRepository.getReferenceById(SecurityUtils.getCurrentUserId());
+            followRequestBuilder.senderUser(senderUser)
+                    .receiverUser(receiverUser)
+                    .sentAt(Instant.now())
+                    .status(FollowRequestStatus.PENDING);
+            followRequestRepository.save(followRequestBuilder.build());
+            serviceResponse
+                    .status(Status.OK)
+                    .message("Follow request sent successfully");
+        } catch (Exception e) {
+            serviceResponse.status(Status.ERROR)
+                    .message("Failed to send follow request");
+            System.out.println(e.getMessage());
+        }
+        return serviceResponse.build();
     }
 }

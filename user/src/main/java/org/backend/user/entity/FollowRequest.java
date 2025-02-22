@@ -2,13 +2,8 @@ package org.backend.user.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.backend.user.enums.FollowRequestStatus;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
@@ -16,10 +11,13 @@ import org.hibernate.type.SqlTypes;
 import java.time.Instant;
 
 @Entity(name = "follow_request")
+@Table(name = "follow_request" ,uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"sender_user_id", "receiver_user_id"})
+})
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class FollowRequest {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
