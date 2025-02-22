@@ -7,10 +7,7 @@ import org.backend.user.enums.Status;
 import org.backend.user.service.interfaces.FollowRequestService;
 import org.backend.user.utils.ServiceResponse;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Set;
 
@@ -32,7 +29,18 @@ public class FollowRequestController {
          if (response.getStatus().equals(Status.OK)) {
              return ResponseEntity.ok(response);
          } else {
-             return ResponseEntity.badRequest().body(response.getMessage());
+             return ResponseEntity.internalServerError().body(response.getMessage());
          }
     }
+
+    @DeleteMapping(path = "/cancel/{userName}", produces = "application/json")
+    public ResponseEntity<?> cancelFollowRequest(@PathVariable @NotNull String userName) {
+        ServiceResponse<?> response = followRequestService.cancelFollowRequest(userName);
+        if (response.getStatus().equals(Status.OK)) {
+            return ResponseEntity.ok(response);
+        } else {
+            return ResponseEntity.internalServerError().body(response.getMessage());
+        }
+    }
+
 }
