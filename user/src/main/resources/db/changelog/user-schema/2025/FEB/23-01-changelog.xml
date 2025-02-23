@@ -48,4 +48,11 @@
     <changeSet id="1740291930798-11" author="Aditya">
         <dropTable cascadeConstraints="true" tableName="user_follower"/>
     </changeSet>
+    <changeSet id="1740312626720-1" author="ADITYA">
+        <addColumn tableName="users">
+            <column name="is_private" type="boolean" defaultValue="false">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

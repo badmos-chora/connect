@@ -1,6 +1,5 @@
 package org.backend.user.repository.interfaces;
 
-import jakarta.persistence.criteria.JoinType;
 import org.backend.user.entity.FollowRequest;
 import org.backend.user.enums.FollowRequestStatus;
 import org.springframework.data.jpa.domain.Specification;
@@ -18,7 +17,7 @@ public interface FollowRequestRepository extends JpaRepository<FollowRequest, Lo
     @Modifying
     @Transactional
     @Query("update follow_request fr set fr.status = ?3 where fr.receiverUser.id = ?1 and fr.senderUser.id = ?2 and fr.status = 'PENDING'")
-    public int updateFollowRequestStatus(Long receiverId, Long senderId, FollowRequestStatus status);
+    int updateFollowRequestStatus(Long receiverId, Long senderId, FollowRequestStatus status);
 
 
     interface  Specs {
@@ -30,6 +29,9 @@ public interface FollowRequestRepository extends JpaRepository<FollowRequest, Lo
         }
         static Specification<FollowRequest> statusIn(FollowRequestStatus status) {
             return (root, query, cb) -> cb.equal(root.get("status"), status.name());
+        }
+        static Specification<FollowRequest> isAccountActive(){
+            return (root, query, builder) -> builder.and(builder.equal(root.get("receiverUser").get("isEnabled"), true) , builder.equal(root.get("receiverUser").get("isLocked"), false));
         }
 
     }

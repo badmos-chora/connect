@@ -28,6 +28,8 @@ public class FollowRequestController {
          ServiceResponse<?> response = followRequestService.newFollowRequest(userName);
          if (response.getStatus().equals(Status.OK)) {
              return ResponseEntity.ok(response);
+         } else if (response.getStatus().equals(Status.BAD_REQUEST)) {
+             return ResponseEntity.badRequest().body(response.getMessage());
          } else {
              return ResponseEntity.internalServerError().body(response.getMessage());
          }
@@ -38,6 +40,8 @@ public class FollowRequestController {
         ServiceResponse<?> response = followRequestService.cancelFollowRequest(userName);
         if (response.getStatus().equals(Status.OK)) {
             return ResponseEntity.ok(response);
+        } else if (response.getStatus().equals(Status.BAD_REQUEST)) {
+            return ResponseEntity.badRequest().body(response.getMessage());
         } else {
             return ResponseEntity.internalServerError().body(response.getMessage());
         }
@@ -48,6 +52,8 @@ public class FollowRequestController {
         ServiceResponse<?> response = followRequestService.acceptFollowRequest(userName);
         if (response.getStatus().equals(Status.OK)) {
             return ResponseEntity.ok(response);
+        } else if (response.getStatus().equals(Status.BAD_REQUEST)) {
+            return ResponseEntity.badRequest().body(response.getMessage());
         } else {
             return ResponseEntity.internalServerError().body(response.getMessage());
         }
