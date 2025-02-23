@@ -11,4 +11,6 @@ public interface FollowRequestService {
     ServiceResponse<?> newFollowRequest(String userName);
 
     ServiceResponse<?> cancelFollowRequest(@NotNull String userName);
+
+    ServiceResponse<?> acceptFollowRequest(@NotNull String requestId);
 }

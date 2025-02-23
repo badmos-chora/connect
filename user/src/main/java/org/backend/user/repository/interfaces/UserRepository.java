@@ -12,9 +12,6 @@ import java.util.List;
 public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificationExecutor<User> {
   User findUserByUserNameIgnoreCase(String username);
   <T> T findById(Long id, Class<T> type);
-
-  Long findIdByUserNameIgnoreCase(String userName);
-
   interface Specs {
     static Specification<User> id(List<Long> id) {
       return (root, query, builder) -> root.get("id").in(id);

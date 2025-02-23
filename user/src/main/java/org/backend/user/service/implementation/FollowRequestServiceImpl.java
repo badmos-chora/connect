@@ -10,10 +10,13 @@ import org.backend.user.projections.FollowRequestProjection;
 import org.backend.user.projections.UserInfoProjection;
 import org.backend.user.repository.interfaces.FollowRequestRepository;
 import org.backend.user.repository.interfaces.UserRepository;
+import org.backend.user.service.interfaces.ConnectionService;
 import org.backend.user.service.interfaces.FollowRequestService;
 import org.backend.user.utils.SecurityUtils;
 import org.backend.user.utils.ServiceResponse;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -26,12 +29,13 @@ public class FollowRequestServiceImpl implements FollowRequestService {
     private static final Logger LOGGER = Logger.getLogger(FollowRequestServiceImpl.class.getName());
     private FollowRequestRepository followRequestRepository;
     private UserRepository userRepository;
+    private ConnectionService connectionService;
 
     @Override
     public Set<FollowRequestDto> getFollowRequests() {
         Long presentUserId = SecurityUtils.getCurrentUserId();
         List<String> project = Arrays.asList("id", "senderUserId", "senderUserUserName", "senderUserFirstName", "senderUserLastName", "receiverUserId",  "receiverUserUserName","receiverUserFirstName","receiverUserLastName", "status", "sentAt");
-        List<FollowRequestProjection> followRequestProjection = followRequestRepository.findBy(FollowRequestRepository.Specs.receiverId(presentUserId),q -> q.as(FollowRequestProjection.class).project(project).all());
+        List<FollowRequestProjection> followRequestProjection = followRequestRepository.findBy(FollowRequestRepository.Specs.receiverId(presentUserId).and(FollowRequestRepository.Specs.statusIn(FollowRequestStatus.PENDING)),q -> q.as(FollowRequestProjection.class).project(project).all());
         Set<FollowRequestDto> followRequestDtoList = new LinkedHashSet<>();
         for (FollowRequestProjection followRequest : followRequestProjection) {
 
@@ -39,7 +43,7 @@ public class FollowRequestServiceImpl implements FollowRequestService {
             followRequestDtoBuilder.id(followRequest.getId())
                     .senderUserId(followRequest.getSenderUserId())
                     .senderUserName(followRequest.getSenderUserUserName())
-                    .senderFullName(followRequest.getReceiverFullName())
+                    .senderFullName(followRequest.getSenderFullName())
                     .receiverUserId(followRequest.getReceiverUserId())
                     .receiverUserName(followRequest.getReceiverUserUserName())
                     .receiverFullName(followRequest.getReceiverFullName())
@@ -88,9 +92,10 @@ public class FollowRequestServiceImpl implements FollowRequestService {
     public ServiceResponse<?> cancelFollowRequest(String userName) {
         ServiceResponse.ServiceResponseBuilder<Object> serviceResponse = ServiceResponse.builder();
         try {
-            Long receiverUserId = userRepository.findBy(UserRepository.Specs.userName(userName), q -> q.as(UserInfoProjection.class).project("id").first()).map(UserInfoProjection::getId).orElseThrow(()-> new Exception("No such user "+userName));
-            Long senderUserId = SecurityUtils.getCurrentUserId();
-            followRequestRepository.delete(FollowRequestRepository.Specs.senderId(senderUserId).and(FollowRequestRepository.Specs.receiverId(receiverUserId)));
+            Long senderUserId = userRepository.findBy(UserRepository.Specs.userName(userName), q -> q.as(UserInfoProjection.class).project("id").first()).map(UserInfoProjection::getId).orElseThrow(()-> new Exception("No such user "+userName));
+            Long receiverUserId = SecurityUtils.getCurrentUserId();
+            int recordsAffected = followRequestRepository.updateFollowRequestStatus(receiverUserId, senderUserId, FollowRequestStatus.REJECTED);
+            if(recordsAffected ==0) throw new Exception("No such follow request found for user "+userName+ " and current user "+senderUserId);
             serviceResponse
                     .status(Status.OK)
                     .message("Follow request cancelled successfully");
@@ -98,6 +103,29 @@ public class FollowRequestServiceImpl implements FollowRequestService {
             serviceResponse.status(Status.ERROR)
                     .message("Failed to cancel follow request");
             LOGGER.severe("Error while cancelling follow request: " + e);
+        }
+        return serviceResponse.build();
+    }
+
+    @Override
+    @Transactional
+    public ServiceResponse<?> acceptFollowRequest(String userName) {
+        ServiceResponse.ServiceResponseBuilder<Object> serviceResponse = ServiceResponse.builder();
+        try{
+            Long senderUserId = userRepository.findBy(UserRepository.Specs.userName(userName), q -> q.as(UserInfoProjection.class).project("id").first()).map(UserInfoProjection::getId).orElseThrow(()-> new Exception("No such user "+userName));
+            Long receiverUserId = SecurityUtils.getCurrentUserId();
+            int recordsAffected = followRequestRepository.updateFollowRequestStatus(receiverUserId, senderUserId, FollowRequestStatus.ACCEPTED);
+            if(recordsAffected ==0) throw new Exception("No such follow request found for user "+userName+ " and current user "+senderUserId);
+
+            ServiceResponse<?> response =connectionService.newConnection(senderUserId,receiverUserId);
+            serviceResponse.status(response.getStatus()).message(response.getMessage());
+            if(response.getStatus().equals(Status.ERROR))
+                TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+
+        } catch (Exception e) {
+            serviceResponse.status(Status.ERROR)
+                    .message("Failed to accept follow request");
+            LOGGER.severe("Error while accepting follow request: " + e);
         }
         return serviceResponse.build();
     }

@@ -73,20 +73,6 @@ public class User {
     @Fetch(FetchMode.JOIN)
     private Set<Permission> permissions = new LinkedHashSet<>();
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = "user_follower",
-            joinColumns = @JoinColumn(name = "user_id", nullable = false),
-            inverseJoinColumns = @JoinColumn(name = "follower_id"),
-            uniqueConstraints = @UniqueConstraint(columnNames = {"user_id","follower_id"}),
-            indexes = {
-                    @Index(name = "idx_user_id",columnList = "user_id", unique = true),
-                    @Index(name = "idx_follower_id",columnList = "follower_id", unique = true)}
-    )
-    private Set<User> followers = new LinkedHashSet<>();
-
-    @ManyToMany(mappedBy = "followers", fetch = FetchType.LAZY)
-    private Set<User> following = new LinkedHashSet<>();
-
     @OneToMany(mappedBy = "senderUser", orphanRemoval = true, fetch = FetchType.LAZY)
     private List<FollowRequest> sentFollowRequests = new ArrayList<>();
 
@@ -95,6 +81,12 @@ public class User {
 
     @Column(name = "created_at", nullable = false)
     private Instant createdAt = Instant.now();
+
+    @OneToMany(mappedBy = "follower", orphanRemoval = true)
+    private List<UserConnection> followingList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "following", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserConnection> followerList = new ArrayList<>();
 
     @Override
     public boolean equals(Object o) {

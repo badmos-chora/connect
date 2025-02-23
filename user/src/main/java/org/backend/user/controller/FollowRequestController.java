@@ -43,4 +43,14 @@ public class FollowRequestController {
         }
     }
 
+    @GetMapping(path = "/accept/{userName}", produces = "application/json")
+    public ResponseEntity<?> acceptFollowRequest(@PathVariable @NotNull String userName) {
+        ServiceResponse<?> response = followRequestService.acceptFollowRequest(userName);
+        if (response.getStatus().equals(Status.OK)) {
+            return ResponseEntity.ok(response);
+        } else {
+            return ResponseEntity.internalServerError().body(response.getMessage());
+        }
+    }
+
 }
