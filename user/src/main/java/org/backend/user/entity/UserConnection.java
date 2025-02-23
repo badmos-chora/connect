@@ -40,6 +40,4 @@ public class UserConnection {
 
     private Instant addedDate = Instant.now();
 
-    @Version
-    private  Long version;
 }

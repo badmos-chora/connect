@@ -66,20 +66,32 @@ public class FollowRequestServiceImpl implements FollowRequestService {
     }
 
     @Override
+    @Transactional
     public ServiceResponse<?> newFollowRequest(String userName) {
         ServiceResponse.ServiceResponseBuilder<Object> serviceResponse = ServiceResponse.builder();
         try {
             FollowRequest.FollowRequestBuilder followRequestBuilder = FollowRequest.builder();
             User receiverUser = userRepository.findUserByUserNameIgnoreCase(userName);
+            if (receiverUser == null) throw new Exception("No such user found");
             User senderUser = userRepository.getReferenceById(SecurityUtils.getCurrentUserId());
-            followRequestBuilder.senderUser(senderUser)
-                    .receiverUser(receiverUser)
-                    .sentAt(Instant.now())
-                    .status(FollowRequestStatus.PENDING);
-            followRequestRepository.save(followRequestBuilder.build());
-            serviceResponse
-                    .status(Status.OK)
-                    .message("Follow request sent successfully");
+            if(receiverUser.getIsPrivate()){
+                followRequestBuilder.senderUser(senderUser)
+                        .receiverUser(receiverUser)
+                        .sentAt(Instant.now())
+                        .status(FollowRequestStatus.PENDING);
+                followRequestRepository.save(followRequestBuilder.build());
+                serviceResponse
+                        .status(Status.OK)
+                        .message("Follow request sent successfully");
+            }
+            else {
+                ServiceResponse<?> response = connectionService.newConnection(senderUser.getId(),receiverUser.getId());
+                serviceResponse.status(response.getStatus()).message(response.getMessage());
+
+                if(response.getStatus().equals(Status.ERROR))
+                    TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            }
+
         } catch (Exception e) {
             serviceResponse.status(Status.ERROR)
                     .message("Failed to send follow request");

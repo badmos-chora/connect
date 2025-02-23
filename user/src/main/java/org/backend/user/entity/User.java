@@ -88,6 +88,10 @@ public class User {
     @OneToMany(mappedBy = "following", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserConnection> followerList = new ArrayList<>();
 
+    @NotNull
+    @Column(name = "is_private", nullable = false)
+    private Boolean isPrivate = false;
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
