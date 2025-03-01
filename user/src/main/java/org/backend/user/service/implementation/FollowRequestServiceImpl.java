@@ -1,6 +1,7 @@
 package org.backend.user.service.implementation;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.backend.user.dto.FollowRequestDto;
 import org.backend.user.entity.FollowRequest;
 import org.backend.user.entity.User;
@@ -26,8 +27,8 @@ import java.util.logging.Logger;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class FollowRequestServiceImpl implements FollowRequestService {
-    private static final Logger LOGGER = Logger.getLogger(FollowRequestServiceImpl.class.getName());
     private FollowRequestRepository followRequestRepository;
     private UserRepository userRepository;
     private ConnectionService connectionService;
@@ -99,12 +100,12 @@ public class FollowRequestServiceImpl implements FollowRequestService {
         } catch (BusinessException e) {
             serviceResponse.status(Status.BAD_REQUEST)
                     .message(e.getMessage());
-            LOGGER.warning(e.getMessage());
+            log.warn(e.getMessage());
         }
         catch (Exception e) {
             serviceResponse.status(Status.ERROR)
                     .message("Failed to send follow request");
-            LOGGER.severe("Error while sending follow request: " + e.getMessage());
+            log.error("Error while sending follow request: " , e);
         }
         return serviceResponse.build();
     }
@@ -123,12 +124,12 @@ public class FollowRequestServiceImpl implements FollowRequestService {
         } catch (BusinessException e) {
             serviceResponse.status(Status.BAD_REQUEST)
                     .message(e.getMessage());
-            LOGGER.warning(e.getMessage());
+            log.warn(e.getMessage());
         }
         catch (Exception e) {
             serviceResponse.status(Status.ERROR)
                     .message("Failed to cancel follow request");
-            LOGGER.severe("Error while cancelling follow request: " + e);
+            log.error("Error while cancelling follow request: ", e);
         }
         return serviceResponse.build();
     }
@@ -151,12 +152,12 @@ public class FollowRequestServiceImpl implements FollowRequestService {
         } catch (BusinessException e) {
             serviceResponse.status(Status.BAD_REQUEST)
                     .message(e.getMessage());
-            LOGGER.warning(e.getMessage());
+            log.warn(e.getMessage());
         }
         catch (Exception e) {
             serviceResponse.status(Status.ERROR)
                     .message("Failed to accept follow request");
-            LOGGER.severe("Error while accepting follow request: " + e);
+            log.error("Error while accepting follow request: ", e);
         }
         return serviceResponse.build();
     }
