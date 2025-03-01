@@ -72,7 +72,7 @@ public class FollowRequestServiceImpl implements FollowRequestService {
         ServiceResponse.ServiceResponseBuilder<Object> serviceResponse = ServiceResponse.builder();
         try {
             FollowRequest.FollowRequestBuilder followRequestBuilder = FollowRequest.builder();
-            User receiverUser = userRepository.findUserByUserNameIgnoreCase(userName);
+            User receiverUser = userRepository.findUserByUserNameIgnoreCase(userName, User.class);
             User senderUser = userRepository.getReferenceById(SecurityUtils.getCurrentUserId());
             if (receiverUser == null || receiverUser.getIsLocked() || !receiverUser.getIsEnabled() || receiverUser.getId().equals(senderUser.getId())) throw new BusinessException("No such user found");
             boolean alreadyExist = followRequestRepository.exists(FollowRequestRepository.Specs.receiverId(receiverUser.getId()).and(FollowRequestRepository.Specs.senderId(senderUser.getId())).and(FollowRequestRepository.Specs.statusIn(FollowRequestStatus.PENDING)));

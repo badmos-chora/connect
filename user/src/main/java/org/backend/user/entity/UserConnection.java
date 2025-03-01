@@ -1,11 +1,13 @@
 package org.backend.user.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.backend.user.embeddable.UserConnectionId;
+import org.backend.user.enums.UserConnectionType;
 
 import java.time.Instant;
 
@@ -36,8 +38,18 @@ public class UserConnection {
     @JoinColumn(name = "following_id", nullable = false, insertable = false, updatable = false)
     private User following;
 
-    private Boolean isCloseFriend = false;
+    @NotNull
+    @Column(name = "is_close_friend", nullable = false)
+    @Builder.Default
+    private Boolean isCloseFriend = Boolean.FALSE;
 
+    @Enumerated(EnumType.STRING)
+    @NotNull
+    @Column(name = "connection_type", nullable = false)
+    @Builder.Default
+    private UserConnectionType connectionType = UserConnectionType.FOLLOWING;
+
+    @Builder.Default
     private Instant addedDate = Instant.now();
 
 }

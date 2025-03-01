@@ -14,7 +14,17 @@ public interface UserInfoProjection {
 
     String getEmail();
 
+     Boolean getIsEnabled();
+
+    Boolean getIsLocked();
+
+    default Boolean isActive() {
+        return getIsEnabled() && !getIsLocked();
+    }
+
     default String getFullName() {
         return getFirstName() + " " + getLastName();
     }
+
+    Boolean getIsPrivate();
 }

@@ -55,4 +55,10 @@
             </column>
         </addColumn>
     </changeSet>
+    <changeSet id="1740376823780-1" author="ADITYA">
+        <dropUniqueConstraint tableName="follow_request" constraintName="uc_2f7cb7a5efb82724a9ae46c57"/>
+        <addColumn tableName="user_connections">
+            <column name="connection_type" type="varchar(255)" />
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

@@ -11,10 +11,7 @@ import org.hibernate.annotations.FetchMode;
 
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Getter
 @Setter
@@ -74,22 +71,24 @@ public class User {
     private Set<Permission> permissions = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "senderUser", orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<FollowRequest> sentFollowRequests = new ArrayList<>();
+    private List<FollowRequest> sentFollowRequests = new LinkedList<>();
 
     @OneToMany(mappedBy = "receiverUser", orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<FollowRequest> receivedFollowRequests = new ArrayList<>();
+    private List<FollowRequest> receivedFollowRequests = new LinkedList<>();
 
     @Column(name = "created_at", nullable = false)
+    @Builder.Default
     private Instant createdAt = Instant.now();
 
     @OneToMany(mappedBy = "follower", orphanRemoval = true)
-    private List<UserConnection> followingList = new ArrayList<>();
+    private List<UserConnection> followingList = new LinkedList<>();
 
     @OneToMany(mappedBy = "following", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<UserConnection> followerList = new ArrayList<>();
+    private List<UserConnection> followerList = new LinkedList<>();
 
     @NotNull
     @Column(name = "is_private", nullable = false)
+    @Builder.Default
     private Boolean isPrivate = false;
 
     @Override

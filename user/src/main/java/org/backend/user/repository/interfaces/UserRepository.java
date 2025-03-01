@@ -10,7 +10,7 @@ import java.util.List;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificationExecutor<User> {
-  User findUserByUserNameIgnoreCase(String username);
+  <T> T findUserByUserNameIgnoreCase(String username, Class<T> type);
   <T> T findById(Long id, Class<T> type);
   interface Specs {
     static Specification<User> id(List<Long> id) {
