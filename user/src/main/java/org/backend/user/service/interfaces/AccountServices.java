@@ -13,4 +13,6 @@ public interface AccountServices {
     ServiceResponse<?> profileForUserName(@NotNull String userName);
 
     ServiceResponse<?> blockUserName(@NotNull String userName);
+
+    ServiceResponse<?> unblockByUserName(@NotNull String userName);
 }

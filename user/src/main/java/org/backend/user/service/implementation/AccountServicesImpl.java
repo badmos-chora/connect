@@ -136,4 +136,25 @@ public class AccountServicesImpl implements AccountServices {
 
         return serviceResponse.build();
     }
+
+    @Override
+    public ServiceResponse<?> unblockByUserName(String userName) {
+        ServiceResponse.ServiceResponseBuilder<?> serviceResponse = ServiceResponse.builder();
+        try {
+            Long loggedInUserId = SecurityUtils.getCurrentUserId();
+            UserInfoProjection userToUnblock = userRepository.findUserByUserNameIgnoreCase(userName, UserInfoProjection.class);
+            if(userToUnblock == null || userToUnblock.getId().equals(loggedInUserId) || !userToUnblock.isActive()) throw new BusinessException("No such user found with username: "+userName);
+            if(connectionService.existsConnectionWithType(loggedInUserId, userToUnblock.getId(), Collections.singletonList(UserConnectionType.BLOCKED), false))
+                connectionService.deleteUserConnection(loggedInUserId, userToUnblock.getId());
+            else throw new BusinessException("User is not blocked");
+            serviceResponse.message("User unblocked successfully").status(Status.OK);
+        } catch (BusinessException e) {
+            log.warn(e.getMessage());
+            serviceResponse.status(Status.BAD_REQUEST).message(e.getMessage());
+        } catch (Exception e) {
+            log.error("Error while unblocking user with username: {}", userName, e);
+            serviceResponse.status(Status.ERROR).message(e.getMessage());
+        }
+        return serviceResponse.build();
+    }
 }

@@ -83,4 +83,9 @@ public class ConnectionServiceImpl implements ConnectionService {
         if(bidirectionalSpecification) conditions = conditions.or(UserConnectionRepository.Specs.followingIdEquals(initiator).and(UserConnectionRepository.Specs.followerIdEquals(otherParty)));
         return userConnectionRepository.exists(conditions.and(UserConnectionRepository.Specs.connectionTypeIn(connectionTypeString)));
     }
+
+    @Override
+    public long deleteUserConnection(Long initiatorId, Long otherPartyId) {
+        return userConnectionRepository.delete(UserConnectionRepository.Specs.followerIdEquals(initiatorId).and(UserConnectionRepository.Specs.followingIdEquals(otherPartyId)));
+    }
 }
