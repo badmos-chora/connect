@@ -7,6 +7,7 @@ import org.backend.user.entity.FollowRequest;
 import org.backend.user.entity.User;
 import org.backend.user.enums.FollowRequestStatus;
 import org.backend.user.enums.Status;
+import org.backend.user.enums.UserConnectionType;
 import org.backend.user.exception.BusinessException;
 import org.backend.user.projections.FollowRequestProjection;
 import org.backend.user.projections.UserInfoProjection;
@@ -23,8 +24,6 @@ import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
-import java.util.logging.Logger;
-
 @Service
 @AllArgsConstructor
 @Slf4j
@@ -75,8 +74,10 @@ public class FollowRequestServiceImpl implements FollowRequestService {
             FollowRequest.FollowRequestBuilder followRequestBuilder = FollowRequest.builder();
             User receiverUser = userRepository.findUserByUserNameIgnoreCase(userName, User.class);
             User senderUser = userRepository.getReferenceById(SecurityUtils.getCurrentUserId());
-            if (receiverUser == null || receiverUser.getIsLocked() || !receiverUser.getIsEnabled() || receiverUser.getId().equals(senderUser.getId())) throw new BusinessException("No such user found");
-            boolean alreadyExist = followRequestRepository.exists(FollowRequestRepository.Specs.receiverId(receiverUser.getId()).and(FollowRequestRepository.Specs.senderId(senderUser.getId())).and(FollowRequestRepository.Specs.statusIn(FollowRequestStatus.PENDING)));
+            boolean connectionExist = connectionService.existsConnectionWithType(senderUser.getId(), receiverUser.getId(), Arrays.asList(UserConnectionType.FOLLOWING,UserConnectionType.BLOCKED), false);
+            boolean isUserBlocked = connectionService.existsConnectionWithType(receiverUser.getId(), senderUser.getId(), Collections.singletonList(UserConnectionType.BLOCKED), false);
+            if (receiverUser.getId() == null || isUserBlocked || receiverUser.getIsLocked() || !receiverUser.getIsEnabled() || connectionExist || receiverUser.getId().equals(senderUser.getId())) throw new BusinessException("No such user found");
+            boolean alreadyExist = checkFollowRequestExists(receiverUser.getId(), senderUser.getId(), FollowRequestStatus.PENDING);
             if(alreadyExist) throw new BusinessException("Follow request already sent to user "+userName);
 
             if(receiverUser.getIsPrivate()){
@@ -90,11 +91,7 @@ public class FollowRequestServiceImpl implements FollowRequestService {
                         .message("Follow request sent successfully");
             }
             else {
-                ServiceResponse<?> response = connectionService.newConnection(senderUser.getId(),receiverUser.getId());
-                serviceResponse.status(response.getStatus()).message(response.getMessage());
-
-                if(response.getStatus().equals(Status.ERROR))
-                    TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+                connectionService.newConnection(senderUser.getId(),receiverUser.getId(), UserConnectionType.FOLLOWING);
             }
 
         } catch (BusinessException e) {
@@ -103,6 +100,7 @@ public class FollowRequestServiceImpl implements FollowRequestService {
             log.warn(e.getMessage());
         }
         catch (Exception e) {
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             serviceResponse.status(Status.ERROR)
                     .message("Failed to send follow request");
             log.error("Error while sending follow request: " , e);
@@ -116,8 +114,7 @@ public class FollowRequestServiceImpl implements FollowRequestService {
         try {
             Long senderUserId = userRepository.findBy(UserRepository.Specs.userName(userName), q -> q.as(UserInfoProjection.class).project("id").first()).map(UserInfoProjection::getId).orElseThrow(()-> new BusinessException("No such user "+userName));
             Long receiverUserId = SecurityUtils.getCurrentUserId();
-            int recordsAffected = followRequestRepository.updateFollowRequestStatus(receiverUserId, senderUserId, FollowRequestStatus.REJECTED);
-            if(recordsAffected ==0) throw new BusinessException("No such follow request found for user "+userName+ " and current user "+senderUserId);
+            updateFollowRequestStatus(receiverUserId, senderUserId, FollowRequestStatus.REJECTED);
             serviceResponse
                     .status(Status.OK)
                     .message("Follow request cancelled successfully");
@@ -141,24 +138,30 @@ public class FollowRequestServiceImpl implements FollowRequestService {
         try{
             Long senderUserId = userRepository.findBy(UserRepository.Specs.userName(userName), q -> q.as(UserInfoProjection.class).project("id").first()).map(UserInfoProjection::getId).orElseThrow(()-> new BusinessException("No such user "+userName));
             Long receiverUserId = SecurityUtils.getCurrentUserId();
-            int recordsAffected = followRequestRepository.updateFollowRequestStatus(receiverUserId, senderUserId, FollowRequestStatus.ACCEPTED);
-            if(recordsAffected ==0) throw new BusinessException("No such follow request found for user "+userName+ " and current user "+senderUserId);
-
-            ServiceResponse<?> response =connectionService.newConnection(senderUserId,receiverUserId);
-            serviceResponse.status(response.getStatus()).message(response.getMessage());
-            if(response.getStatus().equals(Status.ERROR))
-                TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-
+            updateFollowRequestStatus(receiverUserId, senderUserId, FollowRequestStatus.ACCEPTED);
+            connectionService.newConnection(senderUserId,receiverUserId, UserConnectionType.FOLLOWING);
         } catch (BusinessException e) {
             serviceResponse.status(Status.BAD_REQUEST)
                     .message(e.getMessage());
             log.warn(e.getMessage());
         }
         catch (Exception e) {
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             serviceResponse.status(Status.ERROR)
                     .message("Failed to accept follow request");
             log.error("Error while accepting follow request: ", e);
         }
         return serviceResponse.build();
+    }
+
+    @Override
+    public void updateFollowRequestStatus(Long receiverUserId, Long senderUserId, FollowRequestStatus status) throws BusinessException {
+       int recordsAffected = followRequestRepository.updateFollowRequestStatus(receiverUserId, senderUserId, status);
+        if(recordsAffected ==0) throw new BusinessException("No such follow request found for user "+senderUserId+ " and current user "+senderUserId);
+    }
+
+    @Override
+    public boolean checkFollowRequestExists(Long receiverUserId, Long senderUserId, FollowRequestStatus status) throws BusinessException {
+        return followRequestRepository.exists(FollowRequestRepository.Specs.receiverId(receiverUserId).and(FollowRequestRepository.Specs.senderId(senderUserId)).and(FollowRequestRepository.Specs.statusIn(status)));
     }
 }

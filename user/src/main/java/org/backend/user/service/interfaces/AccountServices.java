@@ -11,4 +11,6 @@ public interface AccountServices {
     UserInfoProjection profile();
 
     ServiceResponse<?> profileForUserName(@NotNull String userName);
+
+    ServiceResponse<?> blockUserName(@NotNull String userName);
 }

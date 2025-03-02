@@ -38,4 +38,17 @@ public class AccountController {
             return ResponseEntity.internalServerError().body(response.getMessage());
         }
     }
+
+    @GetMapping("/block/{userName}")
+    public ResponseEntity<?> blockUserName(@NotNull @PathVariable String userName) {
+        ServiceResponse<?> response= accountServices.blockUserName(userName);
+        if (response.getStatus().equals(Status.OK)) {
+            return ResponseEntity.ok(response);
+        } else if (response.getStatus().equals(Status.BAD_REQUEST)) {
+            return ResponseEntity.badRequest().body(response.getMessage());
+        } else {
+            return ResponseEntity.internalServerError().body(response.getMessage());
+        }
+    }
+
 }

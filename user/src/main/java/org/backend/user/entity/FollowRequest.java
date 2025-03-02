@@ -11,9 +11,7 @@ import org.hibernate.type.SqlTypes;
 import java.time.Instant;
 
 @Entity(name = "follow_request")
-@Table(name = "follow_request" ,uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"sender_user_id", "receiver_user_id"})
-})
+@Table(name = "follow_request")
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
@@ -38,9 +36,12 @@ public class FollowRequest {
     @Column(nullable = false)
     @NotNull
     @Enumerated(EnumType.STRING)
+    @Builder.Default
     private FollowRequestStatus status = FollowRequestStatus.PENDING;
 
+    @NotNull
     @Column(name = "sent_at", nullable = false)
+    @Builder.Default
     private Instant sentAt = Instant.now();
 
 }
