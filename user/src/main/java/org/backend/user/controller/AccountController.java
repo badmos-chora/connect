@@ -51,6 +51,19 @@ public class AccountController {
         }
     }
 
+    @GetMapping("/block")
+    public ResponseEntity<?> blockedUsersList() {
+        ServiceResponse<?> response= accountServices.blockedUsersList();
+        if (response.getStatus().equals(Status.OK)) {
+            return ResponseEntity.ok(response);
+        } else if (response.getStatus().equals(Status.BAD_REQUEST)) {
+            return ResponseEntity.badRequest().body(response.getMessage());
+        } else {
+            return ResponseEntity.internalServerError().body(response.getMessage());
+        }
+    }
+
+
     @DeleteMapping("/block/{userName}")
     public ResponseEntity<?> unblockUserName(@NotNull @PathVariable String userName) {
         ServiceResponse<?> response= accountServices.unblockByUserName(userName);
@@ -62,5 +75,6 @@ public class AccountController {
             return ResponseEntity.internalServerError().body(response.getMessage());
         }
     }
+
 
 }

@@ -16,4 +16,6 @@ public interface ConnectionService {
     boolean existsConnectionWithType(Long senderUserId, Long receiverUserId , List<UserConnectionType> connectionType, boolean bidirectional);
 
     long deleteUserConnection(Long initiatorId, Long otherPartyId);
+
+    List<UserConnectionProjection> getUserListOfConnectionType(Long loggedInUserId, UserConnectionType userConnectionType);
 }

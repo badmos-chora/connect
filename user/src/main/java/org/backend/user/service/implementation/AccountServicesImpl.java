@@ -104,6 +104,11 @@ public class AccountServicesImpl implements AccountServices {
         return responseBuilder.build();
     }
 
+    /*
+    Todo
+     optimize block user flow we can reduce the dao call structure like we can check if user is already blocked or not before updating the pending friend requests
+     */
+
     @Override
     @Transactional
     public ServiceResponse<?> blockUserName(String userName) {
@@ -119,8 +124,12 @@ public class AccountServicesImpl implements AccountServices {
             if(followRequestService.checkFollowRequestExists(userToBlock.getId(), userId, FollowRequestStatus.PENDING))
                 followRequestService.updateFollowRequestStatus(userToBlock.getId(), userId, FollowRequestStatus.REJECTED);
 
-            if(connectionService.existsConnectionWithType(userId, userToBlock.getId(), List.of(UserConnectionType.FOLLOWING, UserConnectionType.BLOCKED), false))
-                connectionService.updateConnectionsStatus(userId, userToBlock.getId(), UserConnectionType.BLOCKED);
+            if(connectionService.existsConnectionWithType(userId, userToBlock.getId(), List.of(UserConnectionType.FOLLOWING, UserConnectionType.BLOCKED), false)) {
+                if(connectionService.existsConnectionWithType(userId, userToBlock.getId(), Collections.singletonList(UserConnectionType.FOLLOWING), false))
+                    connectionService.updateConnectionsStatus(userId, userToBlock.getId(), UserConnectionType.BLOCKED);
+                else
+                    throw new Exception("User already blocked with username: "+userName);
+            }
             else
                  connectionService.newConnection(userId, userToBlock.getId(), UserConnectionType.BLOCKED);
 
@@ -154,6 +163,20 @@ public class AccountServicesImpl implements AccountServices {
         } catch (Exception e) {
             log.error("Error while unblocking user with username: {}", userName, e);
             serviceResponse.status(Status.ERROR).message(e.getMessage());
+        }
+        return serviceResponse.build();
+    }
+
+    @Override
+    public ServiceResponse<?> blockedUsersList() {
+        ServiceResponse.ServiceResponseBuilder<List<UserConnectionProjection>> serviceResponse = ServiceResponse.builder();
+        try {
+            Long loggedInUserId = SecurityUtils.getCurrentUserId();
+            List<UserConnectionProjection> blockedUsersList = connectionService.getUserListOfConnectionType(loggedInUserId, UserConnectionType.BLOCKED);
+            serviceResponse.data(blockedUsersList).status(Status.OK);
+        } catch (Exception e) {
+            serviceResponse.status(Status.ERROR).message(e.getMessage());
+            log.error("Error occurred while blocking user list", e);
         }
         return serviceResponse.build();
     }

@@ -15,4 +15,6 @@ public interface AccountServices {
     ServiceResponse<?> blockUserName(@NotNull String userName);
 
     ServiceResponse<?> unblockByUserName(@NotNull String userName);
+
+    ServiceResponse<?> blockedUsersList();
 }

@@ -88,4 +88,10 @@ public class ConnectionServiceImpl implements ConnectionService {
     public long deleteUserConnection(Long initiatorId, Long otherPartyId) {
         return userConnectionRepository.delete(UserConnectionRepository.Specs.followerIdEquals(initiatorId).and(UserConnectionRepository.Specs.followingIdEquals(otherPartyId)));
     }
+
+    @Override
+    public List<UserConnectionProjection> getUserListOfConnectionType(Long loggedInUserId, UserConnectionType userConnectionType) {
+        List<String> projectionRules = List.of("isCloseFriend", "addedDate", "followingUserName", "followingFirstName", "followingLastName");
+        return userConnectionRepository.findBy(UserConnectionRepository.Specs.followerIdEquals(loggedInUserId).and(UserConnectionRepository.Specs.connectionType(userConnectionType)), q->q.as(UserConnectionProjection.class).project(projectionRules).all());
+    }
 }
