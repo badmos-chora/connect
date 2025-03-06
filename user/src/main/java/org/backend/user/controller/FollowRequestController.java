@@ -59,4 +59,16 @@ public class FollowRequestController {
         }
     }
 
+    @DeleteMapping(path = "/remove/{userName}", produces = "application/json")
+    public ResponseEntity<?> removeFriend(@PathVariable @NotNull String userName) {
+        ServiceResponse<?> response = followRequestService.removeFriend(userName);
+        if (response.getStatus().equals(Status.OK)) {
+            return ResponseEntity.ok(response);
+        } else if (response.getStatus().equals(Status.BAD_REQUEST)) {
+            return ResponseEntity.badRequest().body(response.getMessage());
+        } else {
+            return ResponseEntity.internalServerError().body(response.getMessage());
+        }
+    }
+
 }

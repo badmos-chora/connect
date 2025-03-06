@@ -17,4 +17,6 @@ public interface FollowRequestService {
     ServiceResponse<?> acceptFollowRequest(@NotNull String requestId);
     void updateFollowRequestStatus(@NotNull  Long receiverUserId,@NotNull Long senderUserId,@NotNull FollowRequestStatus status) throws BusinessException;
     boolean checkFollowRequestExists(@NotNull Long receiverUserId,@NotNull Long senderUserId, @NotNull FollowRequestStatus status) throws BusinessException;
+
+    ServiceResponse<?> removeFriend(@NotNull String userName);
 }

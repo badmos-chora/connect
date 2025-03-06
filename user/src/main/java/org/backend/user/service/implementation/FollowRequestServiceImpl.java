@@ -164,4 +164,25 @@ public class FollowRequestServiceImpl implements FollowRequestService {
     public boolean checkFollowRequestExists(Long receiverUserId, Long senderUserId, FollowRequestStatus status) throws BusinessException {
         return followRequestRepository.exists(FollowRequestRepository.Specs.receiverId(receiverUserId).and(FollowRequestRepository.Specs.senderId(senderUserId)).and(FollowRequestRepository.Specs.statusIn(status)));
     }
+
+    @Override
+    public ServiceResponse<?> removeFriend(String userName) {
+        ServiceResponse.ServiceResponseBuilder<?> serviceResponse = ServiceResponse.builder();
+        try {
+            Long friendId = userRepository.findBy(UserRepository.Specs.userName(userName), q -> q.as(UserInfoProjection.class).project("id").first()).map(UserInfoProjection::getId).orElseThrow(()-> new BusinessException("No such user "+userName));
+            Long currentUserId = SecurityUtils.getCurrentUserId();
+            connectionService.deleteUserConnection(currentUserId,friendId);
+            serviceResponse.status(Status.OK).message("Friend removed successfully");
+        } catch (BusinessException e) {
+            serviceResponse.status(Status.BAD_REQUEST)
+                    .message(e.getMessage());
+            log.warn(e.getMessage());
+        }
+        catch (Exception e) {
+            serviceResponse.status(Status.ERROR)
+                    .message("Failed to remove friend");
+            log.error("Error while removing friend: ", e);
+        }
+        return serviceResponse.build();
+    }
 }
