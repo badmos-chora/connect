@@ -26,5 +26,10 @@
                               tableName="user_connections"
                               validate="true"/>
     </changeSet>
+    <changeSet id="1741274041297-1" author="ADITYA">
+        <addColumn tableName="users">
+            <column name="profile_picture" type="varchar"/>
+        </addColumn>
+    </changeSet>
 
 </databaseChangeLog>

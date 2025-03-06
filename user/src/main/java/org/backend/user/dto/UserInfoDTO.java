@@ -30,4 +30,5 @@ public class UserInfoDTO implements Serializable {
     private final Long followerCount;
     private final List<UserConnectionProjection> followingList;
     private final List<UserConnectionProjection> followerList;
+    private final String profilePicture;
 }

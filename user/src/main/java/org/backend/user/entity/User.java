@@ -91,6 +91,9 @@ public class User {
     @Builder.Default
     private Boolean isPrivate = false;
 
+    @Column(name = "profile_picture")
+    private String profilePicture;
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;

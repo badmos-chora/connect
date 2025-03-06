@@ -27,4 +27,6 @@ public interface UserInfoProjection {
     }
 
     Boolean getIsPrivate();
+
+    String getProfilePicture();
 }

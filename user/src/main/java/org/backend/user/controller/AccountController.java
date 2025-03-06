@@ -7,8 +7,10 @@ import org.backend.user.enums.Status;
 import org.backend.user.projections.UserInfoProjection;
 import org.backend.user.service.interfaces.AccountServices;
 import org.backend.user.utils.ServiceResponse;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/account")
@@ -67,6 +69,30 @@ public class AccountController {
     @DeleteMapping("/block/{userName}")
     public ResponseEntity<?> unblockUserName(@NotNull @PathVariable String userName) {
         ServiceResponse<?> response= accountServices.unblockByUserName(userName);
+        if (response.getStatus().equals(Status.OK)) {
+            return ResponseEntity.ok(response);
+        } else if (response.getStatus().equals(Status.BAD_REQUEST)) {
+            return ResponseEntity.badRequest().body(response.getMessage());
+        } else {
+            return ResponseEntity.internalServerError().body(response.getMessage());
+        }
+    }
+
+    @PostMapping(value = "/profile-picture", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> userProfilePicture( @RequestPart("picture") MultipartFile file) {
+        ServiceResponse<?> response= accountServices.userProfilePicture(file);
+        if (response.getStatus().equals(Status.OK)) {
+            return ResponseEntity.ok(response);
+        } else if (response.getStatus().equals(Status.BAD_REQUEST)) {
+            return ResponseEntity.badRequest().body(response.getMessage());
+        } else {
+            return ResponseEntity.internalServerError().body(response.getMessage());
+        }
+    }
+
+    @DeleteMapping(value = "/profile-picture")
+    public ResponseEntity<?> removeProfilePicture() {
+        ServiceResponse<?> response= accountServices.removeProfilePicture();
         if (response.getStatus().equals(Status.OK)) {
             return ResponseEntity.ok(response);
         } else if (response.getStatus().equals(Status.BAD_REQUEST)) {

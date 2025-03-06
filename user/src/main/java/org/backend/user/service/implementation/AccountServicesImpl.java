@@ -1,6 +1,6 @@
 package org.backend.user.service.implementation;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.backend.user.dto.UserDto;
 import org.backend.user.dto.UserInfoDTO;
@@ -14,27 +14,35 @@ import org.backend.user.projections.UserInfoProjection;
 import org.backend.user.repository.interfaces.UserRepository;
 import org.backend.user.service.interfaces.AccountServices;
 import org.backend.user.service.interfaces.ConnectionService;
+import org.backend.user.service.interfaces.FileServices;
 import org.backend.user.service.interfaces.FollowRequestService;
 import org.backend.user.utils.SecurityUtils;
 import org.backend.user.utils.ServiceResponse;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
+import org.springframework.util.MimeTypeUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 @Service
-@AllArgsConstructor
 @Slf4j
+@RequiredArgsConstructor
 public class AccountServicesImpl implements AccountServices {
 
-    private BCryptPasswordEncoder passwordEncoder;
-    private UserRepository userRepository;
-    private ConnectionService connectionService;
-    private FollowRequestService followRequestService;
+    private final BCryptPasswordEncoder passwordEncoder;
+    private final UserRepository userRepository;
+    private final ConnectionService connectionService;
+    private final FollowRequestService followRequestService;
+    private final FileServices fileServices;
+
+    @Value("${connect.storage.profile-pic}")
+    private String PROFILE_PICTURE_PATH;
 
 
     @Override
@@ -70,7 +78,8 @@ public class AccountServicesImpl implements AccountServices {
             UserInfoDTO.UserInfoDTOBuilder userInfoDTOBuilder = UserInfoDTO.builder();
             userInfoDTOBuilder.isPrivate(user.getIsPrivate())
                     .fullName(user.getFirstName() + " " + user.getLastName())
-                    .userName(user.getUserName());
+                    .userName(user.getUserName())
+                    .profilePicture(user.getProfilePicture());
             ServiceResponse<UserConnectionProjection> response = connectionService.getUserFollowingAndFollowerList(user.getId());
             if(response.getStatus().equals(Status.ERROR)) return response;
             Map<String, List<UserConnectionProjection>> map = response.getMap();
@@ -180,4 +189,45 @@ public class AccountServicesImpl implements AccountServices {
         }
         return serviceResponse.build();
     }
+
+    @Override
+    public ServiceResponse<?> userProfilePicture(MultipartFile file) {
+        ServiceResponse.ServiceResponseBuilder<?> serviceResponseBuilder = ServiceResponse.builder();
+        try {
+            if (file == null || file.isEmpty() || file.getContentType() == null) throw new BusinessException("File/ContentType is empty");
+            Long loggedInUserId = SecurityUtils.getCurrentUserId();
+            String fileType;
+            if(file.getContentType().equals(MimeTypeUtils.IMAGE_JPEG_VALUE)) fileType = "jpg";
+            else if(file.getContentType().equals(MimeTypeUtils.IMAGE_PNG_VALUE)) fileType = "png";
+            else throw new BusinessException("Invalid file type");
+            String path = fileServices.saveNewFile(file, loggedInUserId, PROFILE_PICTURE_PATH ,fileType);
+            userRepository.updateUserProfilePicture(loggedInUserId, path);
+            serviceResponseBuilder.status(Status.OK).message("User profile picture updated successfully");
+        } catch (BusinessException e) {
+            log.warn(e.getMessage());
+            serviceResponseBuilder.status(Status.BAD_REQUEST).message(e.getMessage());
+        }
+        catch (Exception e) {
+            log.error("Error occurred while updating profile picture", e);
+            serviceResponseBuilder.status(Status.ERROR).message("Error occurred while updating profile picture");
+        }
+        return serviceResponseBuilder.build();
+    }
+
+    @Override
+    public ServiceResponse<?> removeProfilePicture() {
+        ServiceResponse.ServiceResponseBuilder<?> serviceResponseBuilder = ServiceResponse.builder();
+        try {
+            Long loggedInUserId = SecurityUtils.getCurrentUserId();
+            userRepository.updateUserProfilePicture(loggedInUserId, "");
+            serviceResponseBuilder.status(Status.OK).message("User profile picture updated successfully");
+        }
+        catch (Exception e) {
+            log.error("Error occurred while deleting profile picture", e);
+            serviceResponseBuilder.status(Status.ERROR).message("Error occurred while deleting profile picture");
+        }
+        return serviceResponseBuilder.build();
+    }
+
+
 }

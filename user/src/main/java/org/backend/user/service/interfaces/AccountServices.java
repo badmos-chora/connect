@@ -4,6 +4,7 @@ import jakarta.validation.constraints.NotNull;
 import org.backend.user.dto.UserDto;
 import org.backend.user.projections.UserInfoProjection;
 import org.backend.user.utils.ServiceResponse;
+import org.springframework.web.multipart.MultipartFile;
 
 public interface AccountServices {
     String register(UserDto userDto);
@@ -17,4 +18,8 @@ public interface AccountServices {
     ServiceResponse<?> unblockByUserName(@NotNull String userName);
 
     ServiceResponse<?> blockedUsersList();
+
+    ServiceResponse<?> userProfilePicture(MultipartFile file);
+
+    ServiceResponse<?> removeProfilePicture();
 }
