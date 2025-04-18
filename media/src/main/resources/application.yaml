@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: media
+  profiles:
+    active: dev
+
+
+#Logging
+logging:
+  level:
+    root: warn
+    org.hibernate: error
+    web: info
+  file:
+    name: ${connect.storage.base-dir}/${connect.storage.logs-dir}/${spring.application.name}/${spring.application.name}-service.log
+  logback:
+    rollingpolicy:
+      file-name-pattern: ${logging.file.name}.%d{dd-MM-yyyy}.%i.log
+

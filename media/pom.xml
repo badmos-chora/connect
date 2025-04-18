@@ -76,6 +76,10 @@
             <artifactId>spring-security-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>io.awspring.cloud</groupId>
+            <artifactId>spring-cloud-aws-starter-s3</artifactId>
+        </dependency>
     </dependencies>
     <dependencyManagement>
         <dependencies>
@@ -86,7 +90,15 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+            <dependency>
+                <groupId>io.awspring.cloud</groupId>
+                <artifactId>spring-cloud-aws-dependencies</artifactId>
+                <version>3.2.0</version> <!-- Use an appropriate version -->
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
         </dependencies>
+
     </dependencyManagement>
 
     <build>

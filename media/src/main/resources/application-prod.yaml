@@ -1,0 +1,27 @@
+eureka:
+  client:
+    register-with-eureka: true
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
+
+
+connect:
+  storage:
+    base-dir: D:/connect
+    logs-dir: logs
+
+
+spring:
+      data:
+        redis:
+          password: password
+          host: localhost
+      cassandra:
+        contact-points: localhost
+        port: 9042
+        keyspace-name: media
+        schema-action: create_if_not_exists
+        username: user
+        password: password
