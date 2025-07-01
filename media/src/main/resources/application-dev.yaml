@@ -15,12 +15,10 @@ connect:
     storage:
         base-dir: D:/connect
         logs-dir: logs
+    jwt:
+      secret-key: Y29tbXVuLXNlY3JldC1zaGFyZWQua2V5MTIzNDU2Nzg=
 
 spring:
-  data:
-    redis:
-      password: password
-      host: localhost
   cassandra:
     contact-points: localhost
     port: 9042
@@ -28,3 +26,15 @@ spring:
     schema-action: create_if_not_exists
     username: user
     password: password
+    local-datacenter: datacenter1
+
+
+
+  cloud:
+    aws:
+      credentials:
+        secret-key: test
+        access-key: test
+      region:
+        static: ap-south-1
+      endpoint: http://localhost.localstack.cloud:4566
