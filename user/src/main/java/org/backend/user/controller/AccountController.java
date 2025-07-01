@@ -2,6 +2,7 @@ package org.backend.user.controller;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
+import org.backend.user.dto.LoginDto;
 import org.backend.user.dto.UserDto;
 import org.backend.user.enums.Status;
 import org.backend.user.projections.UserInfoProjection;
@@ -22,6 +23,18 @@ public class AccountController {
     @PostMapping("/register")
     public String register(@RequestBody UserDto userDto) {
         return accountServices.register(userDto);
+    }
+
+    @PostMapping("/signin")
+    public ResponseEntity<?> authenticate(@RequestBody LoginDto loginDto) {
+        ServiceResponse<?> response = accountServices.authenticate(loginDto.username(),loginDto.password());
+        if (response.getStatus().equals(Status.OK)) {
+            return ResponseEntity.ok(response);
+        } else if (response.getStatus().equals(Status.BAD_REQUEST)) {
+            return ResponseEntity.badRequest().body(response.getMessage());
+        } else {
+            return ResponseEntity.internalServerError().body(response.getMessage());
+        }
     }
 
     @GetMapping("/profile")

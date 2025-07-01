@@ -2,7 +2,10 @@ package org.backend.user.utils;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.backend.user.security.CustomUserDetails;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.oauth2.jwt.Jwt;
 
 public class SecurityUtils {
 
@@ -21,7 +24,7 @@ public class SecurityUtils {
     }
 
     public static Long getCurrentUserId(){
-        CustomUserDetails currentUser= (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return currentUser.getUsersID();
+        Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return jwt.getClaim("id");
     }
 }

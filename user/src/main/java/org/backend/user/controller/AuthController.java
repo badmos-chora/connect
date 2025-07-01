@@ -2,6 +2,7 @@ package org.backend.user.controller;
 
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.backend.user.utils.SecurityUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -20,12 +21,12 @@ public class AuthController {
 
     @GetMapping("/hi")
     public String hi(HttpServletRequest request) {
-        return "url: -> "+request.getHeader("X-Forwarded-Host");
+        return SecurityUtils.hostUrl(request);
     }
 
     @GetMapping("/auth")
-    public String auth() {
-        return "authenticated";
+    public Long auth() {
+        return SecurityUtils.getCurrentUserId();
     }
 
     @GetMapping("/logout-success")

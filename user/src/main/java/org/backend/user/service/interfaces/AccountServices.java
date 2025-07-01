@@ -22,4 +22,6 @@ public interface AccountServices {
     ServiceResponse<?> userProfilePicture(MultipartFile file);
 
     ServiceResponse<?> removeProfilePicture();
+
+    ServiceResponse<?> authenticate(String username, String password);
 }

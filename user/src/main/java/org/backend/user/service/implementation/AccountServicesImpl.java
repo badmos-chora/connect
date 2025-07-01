@@ -12,13 +12,12 @@ import org.backend.user.exception.BusinessException;
 import org.backend.user.projections.UserConnectionProjection;
 import org.backend.user.projections.UserInfoProjection;
 import org.backend.user.repository.interfaces.UserRepository;
-import org.backend.user.service.interfaces.AccountServices;
-import org.backend.user.service.interfaces.ConnectionService;
-import org.backend.user.service.interfaces.FileServices;
-import org.backend.user.service.interfaces.FollowRequestService;
+import org.backend.user.service.interfaces.*;
 import org.backend.user.utils.SecurityUtils;
 import org.backend.user.utils.ServiceResponse;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,6 +39,8 @@ public class AccountServicesImpl implements AccountServices {
     private final ConnectionService connectionService;
     private final FollowRequestService followRequestService;
     private final FileServices fileServices;
+    private final AuthenticationManager authenticationManager;
+    private final TokenService tokenService;
 
     @Value("${connect.storage.profile-pic}")
     private String PROFILE_PICTURE_PATH;
@@ -226,6 +227,24 @@ public class AccountServicesImpl implements AccountServices {
             log.error("Error occurred while deleting profile picture", e);
             serviceResponseBuilder.status(Status.ERROR).message("Error occurred while deleting profile picture");
         }
+        return serviceResponseBuilder.build();
+    }
+
+    @Override
+    public ServiceResponse<?> authenticate(String username, String password) {
+        ServiceResponse.ServiceResponseBuilder<String> serviceResponseBuilder = ServiceResponse.builder();
+        try {
+            var authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(username, password));
+            String token = tokenService.generateToken(authentication);
+            serviceResponseBuilder.status(Status.OK)
+                    .message("Authentication successful")
+                    .data(token);
+        }catch (Exception e){
+            log.error("Error occurred while logging in", e);
+            serviceResponseBuilder.status(Status.ERROR).message("Error occurred while logging in");
+        }
+
         return serviceResponseBuilder.build();
     }
 
