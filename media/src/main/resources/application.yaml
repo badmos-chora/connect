@@ -17,3 +17,8 @@ logging:
     rollingpolicy:
       file-name-pattern: ${logging.file.name}.%d{dd-MM-yyyy}.%i.log
 
+s3:
+  folder:
+    profile: profile
+  bucket: connect
+

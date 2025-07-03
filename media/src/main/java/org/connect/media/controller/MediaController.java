@@ -21,13 +21,13 @@ public class MediaController {
     @PostMapping("/file")
     public ResponseEntity<?> uploadFile(@RequestPart MultipartFile file) {
         ServiceResponse<?> response = mediaService.uploadFile(file);
-        if (response.getStatus().equals(Status.OK)) {
-            return ResponseEntity.ok(response);
-        } else if (response.getStatus().equals(Status.BAD_REQUEST)) {
-            return ResponseEntity.badRequest().body(response.getMessage());
-        } else {
-            return ResponseEntity.internalServerError().body(response.getMessage());
-        }
+        return response.getResponseEntityWithBody();
+    }
+
+    @GetMapping("/file")
+    public ResponseEntity<?> getFile(@RequestPart MultipartFile file) {
+        ServiceResponse<?> response = mediaService.uploadFile(file);
+        return response.getResponseEntityWithBody();
     }
 
 

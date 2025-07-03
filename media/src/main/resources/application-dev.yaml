@@ -35,6 +35,10 @@ spring:
       credentials:
         secret-key: test
         access-key: test
+      s3:
+        endpoint: http://localhost.localstack.cloud:4566
+        path-style-access-enabled: true
       region:
         static: ap-south-1
       endpoint: http://localhost.localstack.cloud:4566
+
