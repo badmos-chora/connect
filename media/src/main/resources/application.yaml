@@ -18,7 +18,7 @@ logging:
       file-name-pattern: ${logging.file.name}.%d{dd-MM-yyyy}.%i.log
 
 s3:
-  folder:
-    profile: profile
+  default:
+    link-duration: 25
   bucket: connect
 

@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.connect.media.enums.Status;
 import org.connect.media.service.interfaces.MediaService;
 import org.connect.media.service.interfaces.StorageService;
+import org.connect.media.utils.SecurityUtils;
 import org.connect.media.utils.ServiceResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -19,7 +20,9 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.Date;
+import java.util.HashMap;
 
 @Service
 @RequiredArgsConstructor
@@ -27,16 +30,17 @@ import java.util.Date;
 public class MediaServiceImpl implements MediaService {
     private final StorageService storageService;
 
-    @Value("${s3.folder.profile}")
-    private String profilePath;
+    @Value("${s3.default.link-duration}")
+    private Long linkDuration;
 
     @Override
     public ServiceResponse<?> uploadFile(MultipartFile file) {
         ServiceResponse.ServiceResponseBuilder<String> builder = ServiceResponse.builder();
         try {
-            String fileName = profilePath+"/"+file.getOriginalFilename();
+            Long userId = SecurityUtils.getCurrentUserId();
+            String fileName = userId+"/"+userId+"_"+ Instant.now().getEpochSecond() +"_"+file.getOriginalFilename();
             storageService.uploadFile(fileName,file);
-            URL url = storageService.getFile(fileName);
+            URL url = storageService.getFile(fileName,linkDuration);
             builder.data(url.toExternalForm());
             builder.status(Status.OK);
         }catch (Exception e){
@@ -45,4 +49,21 @@ public class MediaServiceImpl implements MediaService {
         }
         return builder.build();
     }
+
+    @Override
+    public ServiceResponse<?> getFile(String fileName) {
+        var response = ServiceResponse.builder();
+        try {
+            URL url = storageService.getFile(fileName,linkDuration);
+            response.data(url.toExternalForm());
+            response.status(Status.OK);
+        } catch (Exception e) {
+            log.error("Exception occurred while retrieving file {}",fileName,e);
+            response.status(Status.ERROR);
+            response.message("Error occurred while retrieving file "+fileName);
+        }
+        return response.build();
+    }
+
+
 }

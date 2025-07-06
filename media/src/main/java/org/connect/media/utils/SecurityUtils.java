@@ -21,7 +21,7 @@ public class SecurityUtils {
         return scheme + "://" + host ;
     }
 
-    public static String getCurrentUserId(){
+    public static Long getCurrentUserId(){
         Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return jwt.getClaim("id");
     }
